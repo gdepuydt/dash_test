@@ -9,7 +9,6 @@ import dash_table_experiments as dt
 from dash.dependencies import Input, Output
 
 app  = dash.Dash()
-data = pd.read_csv('C:\\dev\\Python\\dash_test\\data\\data.csv', sep = ',')
 
 app.layout = html.Div([
     dcc.Upload(
