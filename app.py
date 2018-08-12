@@ -41,6 +41,8 @@ def parse_contents(contents, filename, date):
     try:
         if 'csv' in filename:
             data = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+            print(data.columns[0])
+
         elif 'xls' in filename:
             data = pd.read_excel(io.BytesIO(decoded))
     except Exception as e:
@@ -54,9 +56,9 @@ def parse_contents(contents, filename, date):
             figure={
                 'data': [
                     {
-                    'x': data.columns[0],
-                    'y': data.columns[1],
-                    'customdata': ['c.a', 'c.b', 'c.c', 'c.d'],
+                    'x': data.iloc[:,1],
+                    'y': data.iloc[:,0],
+                    #'customdata': ['c.a', 'c.b', 'c.c', 'c.d'],
                     'name': 'Trace 1',
                     'mode': 'markers',
                     'marker': {'size': 12}
