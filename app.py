@@ -48,7 +48,23 @@ def parse_contents(contents, filename, date):
         return html.Div(['There was an error processing this file. File type not supported?'])
     return html.Div([
         html.H1(filename),
-        dt.DataTable(rows=data.to_dict('records'))
+        dt.DataTable(rows=data.to_dict('records')),
+        dcc.Graph(
+            id='basic-interactions',
+            figure={
+                'data': [
+                    {
+                    'x': data.columns[0],
+                    'y': data.columns[1],
+                    'customdata': ['c.a', 'c.b', 'c.c', 'c.d'],
+                    'name': 'Trace 1',
+                    'mode': 'markers',
+                    'marker': {'size': 12}
+
+                    }
+                ]
+            }
+        )
     ])
 @app.callback(Output('output-data-upload', 'children'),
               [Input('upload-data', 'contents'),
