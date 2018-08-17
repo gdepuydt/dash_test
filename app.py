@@ -84,7 +84,10 @@ def parse_contents(contents, filename, date):
                     'marker': {'size': 12}
 
                     }
-                ]
+                ],
+                'layout': {
+                    'height' : 800
+                }
             }
         )
     ])
