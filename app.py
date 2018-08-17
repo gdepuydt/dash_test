@@ -69,6 +69,7 @@ def parse_contents(contents, filename, date):
             filterable=True,
             sortable=True,
             selected_row_indices=[],
+            max_rows_in_viewport = 50,
             id='datatable-hospitals'
         ),
         dcc.Graph(
