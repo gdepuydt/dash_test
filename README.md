@@ -15,5 +15,5 @@ Python repository for learning the creation of interactive dashboards using the 
 
 Currently the only code available is in the _app.py_ Python script.
 It is suggested to first get that one running successfully.
-I have included a mock data.csv file for drag & dropping into the app to test everything is working as intended.
+A mock data.csv file is included (testdata folder) for drag & dropping into the app to test that everything is working as intended.
 
