@@ -1,12 +1,14 @@
 import base64
 import io
-
 import dash
+import numpy as np
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import dash_table_experiments as dt
+import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
+from datetime import datetime
 
 app  = dash.Dash()
 app.config['suppress_callback_exceptions']=True
@@ -61,6 +63,17 @@ def parse_contents(contents, filename, date):
     except Exception as e:
         print(e)
         return html.Div(['There was an error processing this file. File type not supported?'])
+
+    hospital_connections = go.Scatter(x=data.iloc[:,1], y=data.iloc[:,0], name='', opacity =1, mode = 'markers')
+
+    diagnose_start_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in data.iloc[:,2]]
+    diagnose_end_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in data.iloc[:,3]]
+    covered_diagnose_timespans = []
+    for i in range (0,len(data.iloc[:,0])):
+        hosp=[data.iloc[i,0],data.iloc[i,0]]
+        dates=[diagnose_start_dates[i],diagnose_end_dates[i]]
+        covered_diagnose_timespan = go.Scatter(x=dates, y=hosp, name='', opacity =1)
+        covered_diagnose_timespans.append(covered_diagnose_timespan)
     return html.Div([
         html.H1(filename),
         dt.DataTable(
@@ -75,23 +88,19 @@ def parse_contents(contents, filename, date):
         dcc.Graph(
             id='datagraph-hospitals',
             figure={
-                'data': [
-                    {
-                    'x': data.iloc[:,1],
-                    'y': data.iloc[:,0],
-                    #'customdata': ['c.a', 'c.b', 'c.c', 'c.d'],
-                    'name': 'Trace 1',
-                    'mode': 'markers',
-                    'marker': {'size': 12}
-
-                    }
-                ],
-                'layout': {
-                    'height' : 800
-                }
+                'data': [hospital_connections],
+                'layout': go.Layout(title='Hospital connection dates', height=800)
+            }
+        ),
+        dcc.Graph(
+            id='chart-diagnose-coverage',
+            figure={
+                'data': covered_diagnose_timespans,
+                'layout' : go.Layout(title='Covered diagnose timespans per hospital', height=800)
             }
         )
     ])
+
 @app.callback(Output('output-data-upload', 'children'),
               [Input('upload-data', 'contents'),
                Input('upload-data', 'filename'),
@@ -120,25 +129,41 @@ def update_selected_row_indices(clickData, selected_row_indices):
     Output('datagraph-hospitals', 'figure'),
     [Input('datatable-hospitals', 'rows'),
      Input('datatable-hospitals', 'selected_row_indices')])
-def update_figure(rows, selected_row_indices):
+def update_hospital_connections_figure(rows, selected_row_indices):
     dff = pd.DataFrame(rows)
-    
-    marker = {'color': ['#0074D9']*len(dff), 'size':12}
+    custom_markers = []*len(dff)
+    for l in range (0, len(dff)):
+        custom_markers = dict(color=['#0074D9']*len(dff), size=12)
     for i in (selected_row_indices or []):
-        marker['color'][i] = '#FF851B'
+        custom_markers['color'][i] = '#FF851B'
+    hospital_connections = go.Scatter(x=dff['Connection Date'], y=dff['Site'], name='', opacity =1, mode = 'markers', marker = custom_markers)
     fig={
-            'data': [{
-                'x': dff.iloc[:,0],
-                'y': dff.iloc[:,1],
-                'name': 'Trace 1',
-                'mode': 'markers',
-                'marker': marker
-
-            }]
+           'data': [hospital_connections],
+           'layout': go.Layout(title='Hospital connection dates', height=800)
     }
         
     return fig
 
+
+@app.callback(
+    Output('chart-diagnose-coverage', 'figure'),
+    [Input('datatable-hospitals', 'rows')])
+def update_hospital_connections_figure(rows):
+    dff = pd.DataFrame(rows)
+    diagnose_start_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in dff['Diagnoses Start Date']]
+    diagnose_end_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in dff['Diagnoses End Date']]
+    covered_diagnose_timespans = []
+    for i in range (0,len(dff.iloc[:,0])):
+        hosp=[dff.loc[i,'Site'],dff.loc[i,'Site']]
+        dates=[diagnose_start_dates[i],diagnose_end_dates[i]]
+        covered_diagnose_timespan = go.Scatter(x=dates, y=hosp, name='', opacity =1)
+        covered_diagnose_timespans.append(covered_diagnose_timespan)
+    fig={
+        'data': covered_diagnose_timespans,
+        'layout' : go.Layout(title='Covered diagnose timespans per hospital', height=800)
+    }
+        
+    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=False)
