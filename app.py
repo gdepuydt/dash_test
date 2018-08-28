@@ -55,7 +55,7 @@ def parse_contents(contents, filename, date):
 
     try:
         if 'csv' in filename:
-            data = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+            data = pd.read_csv(io.StringIO(decoded.decode('utf-8')), skipinitialspace = True)
             print(data.columns[0])
 
         elif 'xls' in filename:
@@ -66,8 +66,8 @@ def parse_contents(contents, filename, date):
 
     hospital_connections = go.Scatter(x=data.iloc[:,1], y=data.iloc[:,0], name='', opacity =1, mode = 'markers')
 
-    diagnose_start_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in data.iloc[:,2]]
-    diagnose_end_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in data.iloc[:,3]]
+    diagnose_start_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in data.iloc[:,2].str.strip()]
+    diagnose_end_dates = [datetime.strptime(dat, '%Y-%m-%d').date() for dat in data.iloc[:,3].str.strip()]
     covered_diagnose_timespans = []
     for i in range (0,len(data.iloc[:,0])):
         hosp=[data.iloc[i,0],data.iloc[i,0]]
